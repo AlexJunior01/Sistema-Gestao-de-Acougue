@@ -9,11 +9,11 @@ app = Flask(__name__)
 db = sqlite3.connect('acougue.db')
 
 
-def insert_corte(corte, preco, quantidade):
+def insert_corte(corte, preco):
     with closing(sqlite3.connect("acougue.db")) as connection:
         with closing(connection.cursor()) as cursor:
-            cursor.execute("INSERT INTO corte(nome_corte, preco, quantidade) VALUES(?, ?, ?)",
-                           (corte, preco, quantidade))
+            cursor.execute("INSERT INTO corte(nome_corte, preco, quantidade) VALUES(?, ?, 0)",
+                           (corte, preco))
             connection.commit()
 
 
@@ -47,7 +47,7 @@ def compras():
 @app.route("/cortes", methods=["GET", "POST"])
 def cortes():
     if request.method == "POST":
-        insert_corte(request.form.get('corte'), request.form.get('preco'), request.form.get('quantidade'))
+        insert_corte(request.form.get('corte'), request.form.get('preco'))
         return redirect("/cortes")
     else:
         with closing(sqlite3.connect("acougue.db")) as connection:
