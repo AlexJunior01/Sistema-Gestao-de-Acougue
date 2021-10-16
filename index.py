@@ -69,8 +69,21 @@ def deletar_corte():
 @app.route("/atualizar_corte", methods=["GET", "POST"])
 def atualizar_corte():
     if request.method == "POST":
-        # SQL_BASE =
-        # deletar_corte_db(request.form.get('id'))
+        id = request.form.get('id')
+        corte = request.form.get('corte')
+        preco = request.form.get('preco')
+        quantidade = request.form.get('quantidade')
+
+        with closing(sqlite3.connect("acougue.db")) as connection:
+            with closing(connection.cursor()) as cursor:
+                if corte:
+                    cursor.execute("UPDATE corte SET nome_corte = ? WHERE id = ?", (corte, id,))
+                if preco:
+                    cursor.execute("UPDATE corte SET preco = ? WHERE id = ?", (preco, id,))
+                if quantidade:
+                    cursor.execute("UPDATE corte SET quantidade = ? WHERE id = ?", (quantidade, id,))
+                connection.commit()
+
         return redirect("/cortes")
 
     return redirect("/cortes")
