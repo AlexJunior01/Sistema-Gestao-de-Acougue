@@ -17,6 +17,13 @@ def insert_corte(corte, preco, quantidade):
             connection.commit()
 
 
+def deletar_corte_db(id_corte):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            cursor.execute("DELETE FROM corte WHERE id = ?;", (id_corte,))
+            connection.commit()
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -48,6 +55,25 @@ def cortes():
                 rows = cursor.execute("SELECT * FROM corte;").fetchall()
 
         return render_template("cortes.html", carnes=rows)
+
+
+@app.route("/deletar_corte", methods=["GET", "POST"])
+def deletar_corte():
+    if request.method == "POST":
+        deletar_corte_db(request.form.get('id'))
+        return redirect("/cortes")
+
+    return redirect("/cortes")
+
+
+@app.route("/atualizar_corte", methods=["GET", "POST"])
+def atualizar_corte():
+    if request.method == "POST":
+        # SQL_BASE =
+        # deletar_corte_db(request.form.get('id'))
+        return redirect("/cortes")
+
+    return redirect("/cortes")
 
 
 @app.route("/relatorios", methods=["GET", "POST"])
