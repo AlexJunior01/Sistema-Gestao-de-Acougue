@@ -6,13 +6,14 @@ from contextlib import closing
 currentDirectory = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
+db = sqlite3.connect('acougue.db')
 
 
-def insert_corte():
+def insert_corte(corte, preco, quantidade):
     with closing(sqlite3.connect("acougue.db")) as connection:
         with closing(connection.cursor()) as cursor:
             cursor.execute("INSERT INTO corte(nome_corte, preco, quantidade) VALUES(?, ?, ?)",
-                           ("Picanha", 40.45, 50))
+                           (corte, preco, quantidade))
             connection.commit()
 
 
@@ -22,7 +23,7 @@ def index():
         return redirect("/")
 
     else:
-        insert_corte()
+        # insert_corte()
         return render_template("tela_inicial.html")
 
 
@@ -38,12 +39,15 @@ def compras():
 
 @app.route("/cortes", methods=["GET", "POST"])
 def cortes():
-    rows = []
-    with closing(sqlite3.connect("acougue.db")) as connection:
-        with closing(connection.cursor()) as cursor:
-            rows = cursor.execute("SELECT * FROM corte;").fetchall()
+    if request.method == "POST":
+        insert_corte(request.form.get('corte'), request.form.get('preco'), request.form.get('quantidade'))
+        return redirect("/cortes")
+    else:
+        with closing(sqlite3.connect("acougue.db")) as connection:
+            with closing(connection.cursor()) as cursor:
+                rows = cursor.execute("SELECT * FROM corte;").fetchall()
 
-    return render_template("cortes.html", carnes=rows)
+        return render_template("cortes.html", carnes=rows)
 
 
 @app.route("/relatorios", methods=["GET", "POST"])
