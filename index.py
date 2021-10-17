@@ -59,6 +59,9 @@ def insere_venda(id_corte, peso, valor_total, cursor):
 
 
 def nova_venda(id_corte, peso, valor_total):
+    print(id_corte)
+    print(peso)
+    print(valor_total)
     with closing(sqlite3.connect("acougue.db")) as connection:
         with closing(connection.cursor()) as cursor:
             corte = get_corte_id(id_corte)
@@ -75,6 +78,38 @@ def vendas():
     else:
         rows = get_resumo_vendas()
         return render_template("vendas.html", vendas=rows)
+
+
+@app.route("/calcular_venda", methods=["GET", "POST"])
+def calcula_venda():
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            rows = get_resumo_vendas()
+
+            id_corte = request.form.get('id_corte')
+            peso = request.form.get('peso')
+
+            preco = cursor.execute("SELECT preco FROM corte WHERE id = ?;", (id_corte,)).fetchone()
+
+            valor_total = float(preco[0]) * float(peso)
+
+    return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
+
+
+@app.route("/calcular_venda", methods=["GET", "POST"])
+def limpar_venda():
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            rows = get_resumo_vendas()
+
+            id_corte = request.form.get('id_corte')
+            peso = request.form.get('peso')
+
+            preco = cursor.execute("SELECT preco FROM corte WHERE id = ?;", (id_corte,)).fetchone()
+
+            valor_total = float(preco[0]) * float(peso)
+
+    return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
 
 
 @app.route("/compras", methods=["GET", "POST"])

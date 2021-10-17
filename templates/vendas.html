@@ -21,16 +21,20 @@
             <div class="row mb-5">
                 <form action="/vendas" method="post">
                     <div class="input-group mb-3">
-                        <input name="id_corte" type="text" class="form-control" placeholder="Id">
-                        <input name="peso" type="text" class="form-control" placeholder="Peso">
-                        <input name="valor_total" type="text" class="form-control" placeholder="Valor total">
+                        <input name="id_corte" type="text" class="form-control" placeholder="Id corte" value={{ id_corte }}>
+                        <input name="peso" type="text" class="form-control" placeholder="Peso" value={{ peso }} >
+                        <input name="valor_total" type="hidden" class="form-control" placeholder="Valor total" value={{ valor_total }} >
+                        
+                        <input name="valor_total_visivel" class="form-control" type="text" aria-label="Disabled input example" disabled readonly value="R$ {{ valor_total }} ">
+
                         <button type="submit" formaction="/vendas" class="btn btn-primary btn-lg"> Confirmar </button>
                     </div>
+                    <div role="main" class="col-md-2">
+                        <button type="submit" formaction="/calcular_venda" class="btn btn-secondary"> Calcular </button>
+                        <button type="submit" formaction="/atualizar_corte" class="btn btn-secondary"> Limpar </button>
+                    </div>
                 </form>
-                <div role="main" class="col-md-2">
-                    <button type="submit" formaction="/deletar_corte" class="btn btn-secondary"> Calcular </button>
-                    <button type="submit" formaction="/atualizar_corte" class="btn btn-secondary"> Limpar </button>
-                </div>
+                
 
             </div>
             <div class="row">
