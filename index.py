@@ -96,20 +96,13 @@ def calcula_venda():
     return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
 
 
-@app.route("/calcular_venda", methods=["GET", "POST"])
+@app.route("/limpar_venda", methods=["GET", "POST"])
 def limpar_venda():
     with closing(sqlite3.connect("acougue.db")) as connection:
         with closing(connection.cursor()) as cursor:
             rows = get_resumo_vendas()
 
-            id_corte = request.form.get('id_corte')
-            peso = request.form.get('peso')
-
-            preco = cursor.execute("SELECT preco FROM corte WHERE id = ?;", (id_corte,)).fetchone()
-
-            valor_total = float(preco[0]) * float(peso)
-
-    return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
+    return render_template("vendas.html", vendas=rows, valor_total=0)
 
 
 @app.route("/compras", methods=["GET", "POST"])
