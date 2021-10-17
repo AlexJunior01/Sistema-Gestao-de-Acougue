@@ -7,6 +7,14 @@ currentDirectory = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
 db = sqlite3.connect('acougue.db')
+db.row_factory = sqlite3.Row
+
+
+def get_corte_id(id):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            result = cursor.execute("SELECT id FROM corte WHERE id = ?;", (id,)).fetchone()
+    return result
 
 
 def insert_corte(corte, preco):
@@ -34,9 +42,39 @@ def index():
         return render_template("tela_inicial.html")
 
 
+def get_resumo_vendas():
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
+        with closing(connection.cursor()) as cursor:
+            rows = connection.execute('''SELECT venda.id, data_venda, nome_corte, venda.quantidade, valor_total FROM venda 
+            INNER JOIN corte ON venda.corte_id = corte.id
+            ORDER BY venda.data_venda DESC LIMIT 5;''').fetchall()
+    return rows
+
+
+def insere_venda(id_corte, peso, valor_total, cursor):
+    sql = '''INSERT INTO venda(corte_id, quantidade, valor_total, data_venda) 
+            VALUES(?, ?, ?, datetime('now'));'''
+    cursor.execute(sql, (id_corte, peso, valor_total))
+
+
+def nova_venda(id_corte, peso, valor_total):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            corte = get_corte_id(id_corte)
+            if corte:
+                insere_venda(id_corte, peso, valor_total, cursor)
+                connection.commit()
+
+
 @app.route("/vendas", methods=["GET", "POST"])
 def vendas():
-    return render_template("vendas.html")
+    if request.method == "POST":
+        nova_venda(request.form.get('id_corte'), request.form.get('peso'), request.form.get('valor_total'))
+        return redirect("/vendas")
+    else:
+        rows = get_resumo_vendas()
+        return render_template("vendas.html", vendas=rows)
 
 
 @app.route("/compras", methods=["GET", "POST"])
