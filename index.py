@@ -12,8 +12,9 @@ db.row_factory = sqlite3.Row
 
 def get_corte_id(id):
     with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
         with closing(connection.cursor()) as cursor:
-            result = cursor.execute("SELECT id FROM corte WHERE id = ?;", (id,)).fetchone()
+            result = cursor.execute("SELECT * FROM corte WHERE id = ?;", (id,)).fetchone()
     return result
 
 
@@ -32,13 +33,17 @@ def deletar_corte_db(id_corte):
             connection.commit()
 
 
+def atualizar_estoque(id_corte, novo_peso, cursor):
+    sql = '''UPDATE corte SET quantidade = ? WHERE id = ?'''
+    cursor.execute(sql, (novo_peso, id_corte))
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         return redirect("/")
 
     else:
-        # insert_corte()
         return render_template("tela_inicial.html")
 
 
@@ -59,14 +64,14 @@ def insere_venda(id_corte, peso, valor_total, cursor):
 
 
 def nova_venda(id_corte, peso, valor_total):
-    print(id_corte)
-    print(peso)
-    print(valor_total)
     with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
         with closing(connection.cursor()) as cursor:
             corte = get_corte_id(id_corte)
             if corte:
+                novo_peso = corte['quantidade'] - float(peso)
                 insere_venda(id_corte, peso, valor_total, cursor)
+                atualizar_estoque(id_corte, novo_peso, cursor)
                 connection.commit()
 
 
