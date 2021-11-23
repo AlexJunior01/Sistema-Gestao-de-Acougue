@@ -110,9 +110,65 @@ def limpar_venda():
     return render_template("vendas.html", vendas=rows, valor_total=0)
 
 
+############################################### COMPRAS ##################################################################
+def get_resumo_compras():
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
+        with closing(connection.cursor()) as cursor:
+            rows = connection.execute('''SELECT compra.id, data_entrada, nome_corte, compra.quantidade, preco_kg FROM compra 
+            INNER JOIN corte ON compra.corte_id = corte.id
+            ORDER BY compra.data_entrada DESC LIMIT 5;''').fetchall()
+    return rows
+
+def insere_compra(id_corte, peso, preco, cursor):
+    sql = '''INSERT INTO compra(corte_id, quantidade, preco_kg, data_entrada) 
+            VALUES(?, ?, ?, datetime('now'));'''
+    cursor.execute(sql, (id_corte, peso, preco))
+
+
+def nova_compra(id_corte, peso, preco):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
+        with closing(connection.cursor()) as cursor:
+            corte = get_corte_id(id_corte)
+            if corte:
+                novo_peso = corte['quantidade'] + float(peso)
+                insere_compra(id_corte, peso, preco, cursor)
+                atualizar_estoque(id_corte, novo_peso, cursor)
+                connection.commit()
+
 @app.route("/compras", methods=["GET", "POST"])
 def compras():
-    return render_template("compras.html")
+    if request.method == "POST":
+        nova_compra(request.form.get('id_corte'), request.form.get('peso'), request.form.get('preco'))
+        return redirect("/compras")
+    else:
+        rows = get_resumo_compras()
+        return render_template("compras.html", compras=rows)
+
+
+@app.route("/calcular_compra", methods=["GET", "POST"])
+def calcula_compra():
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            rows = get_resumo_compras()
+
+            id_corte = request.form.get('id_corte')
+            peso = request.form.get('peso')
+            preco = request.form.get('preco')
+
+            valor_total = float(preco) * float(peso)
+
+    return render_template("compras.html", compras=rows, preco=preco, valor_total=valor_total, id_corte=id_corte, peso=peso)
+
+
+@app.route("/limpar_compra", methods=["GET", "POST"])
+def limpar_compra():
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            rows = get_resumo_compras()
+
+    return render_template("compras.html", compras=rows, valor_total=0)
 
 
 @app.route("/cortes", methods=["GET", "POST"])
