@@ -37,7 +37,7 @@ def atualizar_estoque(id_corte, novo_peso, cursor):
     sql = '''UPDATE corte SET quantidade = ? WHERE id = ?'''
     cursor.execute(sql, (novo_peso, id_corte))
 
-
+################################################################ INDEX ################################################################
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -47,6 +47,8 @@ def index():
         return render_template("tela_inicial.html")
 
 
+
+################################################################ VENDAS ################################################################
 def get_resumo_vendas():
     with closing(sqlite3.connect("acougue.db")) as connection:
         connection.row_factory = sqlite3.Row
@@ -171,6 +173,8 @@ def limpar_compra():
     return render_template("compras.html", compras=rows, valor_total=0)
 
 
+################################################################ CORTES ################################################################
+
 @app.route("/cortes", methods=["GET", "POST"])
 def cortes():
     if request.method == "POST":
@@ -216,6 +220,22 @@ def atualizar_corte():
     return redirect("/cortes")
 
 
+################################################################ RELATORIOS ################################################################
+
+@app.route("/relatorio_compras", methods=["GET", "POST"])
+def relatorio_compras():
+    return render_template("relatorio_compras.html")
+
+
+@app.route("/relatorio_vendas", methods=["GET", "POST"])
+def relatorio_vendas():
+    return render_template("relatorio_vendas.html")
+
+
+
+
+
+
 @app.route("/relatorios", methods=["GET", "POST"])
 def relatorios():
     return render_template("relatorios.html")
@@ -223,3 +243,4 @@ def relatorios():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
