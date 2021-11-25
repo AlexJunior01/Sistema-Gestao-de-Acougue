@@ -18,7 +18,60 @@
             <h1>Compras</h1>
         </div>
         <div class="container">
-            <h1>Pagina em construção</h1>
+            <div class="row mb-5">
+                <form action="/compras" method="post">
+                    <div class="input-group mb-3">
+                        <input name="id_corte" type="text" class="form-control" placeholder="Id corte" value={{ id_corte }}>
+                        <input name="peso" type="text" class="form-control" placeholder="Peso" value={{ peso }} >
+                        <input name="preco" type="text" class="form-control" placeholder="Preco/Kg" value={{ preco }} >
+                        <input name="valor_total" type="hidden" class="form-control" placeholder="Valor total" value={{ valor_total }} >
+                        
+                        <input name="valor_total_visivel" class="form-control" type="text" aria-label="Disabled input example" disabled readonly value="R$ {{ valor_total }} ">
+
+                        <button type="submit" formaction="/compras" class="btn btn-primary btn-lg"> Confirmar </button>
+                    </div>
+                    <div role="main" class="col-md-2">
+                        <button type="submit" formaction="/calcular_compra" class="btn btn-secondary"> Calcular </button>
+                        <button type="submit" formaction="/limpar_compra" class="btn btn-secondary"> Limpar </button>
+                    </div>
+                </form>
+                
+
+            </div>
+            <div class="row">
+                <div role="main" class="col-md-12">
+                    <h2>Últimas Compras</h2>
+                     <table class="table table-striped table-responsive table-bordered">
+                        <thead class="thead-default">
+                            <tr>
+                                <th>Id</th>
+                                <th>Data da Compra</th>
+                                <th>Carne</th>
+                                <th>Quantidade</th>
+                                <th>Preço Kg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for compra in compras:%}
+                            <tr>
+                                <td>{{ compra['id'] }}</td>
+                                <td>{{ compra['data_entrada'] }}</td>
+                                <td>{{ compra['nome_corte'] }}</td>
+                                <td>{{ compra['quantidade'] }}</td>
+                                <td>{{ compra['preco_kg'] }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10"></div>
+                <div class="col-md-2">
+                    <a class="btn btn-primary" href="/relatorios" role="button">Relatório</a>
+                </div>
+            </div>
         </div>
     </body>
 </html>
