@@ -93,9 +93,55 @@ def create_app(test_config=None):
         rows = get_resumo_vendas()
         return render_template("vendas.html", vendas=rows, valor_total=0)
 
+    ############################################## COMPRAS ##################################################################
+    def get_resumo_compras():
+        connection = db.get_db()
+        rows = connection.execute('''SELECT compra.id, data_entrada, nome_corte, compra.quantidade, preco_kg FROM compra 
+        INNER JOIN corte ON compra.corte_id = corte.id
+        ORDER BY compra.data_entrada DESC LIMIT 5;''').fetchall()
+        return rows
+
+    def insere_compra(id_corte, peso, preco):
+        connection = db.get_db()
+        sql = '''INSERT INTO compra(corte_id, quantidade, preco_kg, data_entrada) 
+                VALUES(?, ?, ?, datetime('now'));'''
+        connection.execute(sql, (id_corte, peso, preco))
+
+    def nova_compra(id_corte, peso, preco):
+        connection = db.get_db()
+        corte = get_corte_id(id_corte)
+        if corte:
+            novo_peso = corte['quantidade'] + float(peso)
+            insere_compra(id_corte, peso, preco)
+            atualizar_estoque(id_corte, novo_peso)
+            connection.commit()
+
     @app.route("/compras", methods=["GET", "POST"])
     def compras():
-        return render_template("compras.html")
+        if request.method == "POST":
+            nova_compra(request.form.get('id_corte'), request.form.get('peso'), request.form.get('preco'))
+            return redirect("/compras")
+        else:
+            rows = get_resumo_compras()
+            return render_template("compras.html", compras=rows)
+
+    @app.route("/calcular_compra", methods=["GET", "POST"])
+    def calcula_compra():
+
+        rows = get_resumo_compras()
+
+        id_corte = request.form.get('id_corte')
+        peso = request.form.get('peso')
+        preco = request.form.get('preco')
+
+        valor_total = float(preco) * float(peso)
+        return render_template("compras.html", compras=rows, preco=preco, valor_total=valor_total, id_corte=id_corte,
+                       peso=peso)
+
+    @app.route("/limpar_compra", methods=["GET", "POST"])
+    def limpar_compra():
+        rows = get_resumo_compras()
+        return render_template("compras.html", compras=rows, valor_total=0)
 
     @app.route("/cortes", methods=["GET", "POST"])
     def cortes():
