@@ -76,6 +76,16 @@ def nova_venda(id_corte, peso, valor_total):
                 atualizar_estoque(id_corte, novo_peso, cursor)
                 connection.commit()
 
+def buscar_vendas(data_inicio, data_fim):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
+        with closing(connection.cursor()) as cursor:
+       	    rows = connection.execute('''SELECT venda.id, data_venda, nome_corte, venda.quantidade, valor_total FROM venda 
+            INNER JOIN corte ON venda.corte_id = corte.id
+            WHERE data_venda BETWEEN ? and date(?, '+1 day')
+            ORDER BY venda.data_venda DESC;''', (data_inicio, data_fim)).fetchall()
+    return rows
+
 
 @app.route("/vendas", methods=["GET", "POST"])
 def vendas():
@@ -138,6 +148,16 @@ def nova_compra(id_corte, peso, preco):
                 insere_compra(id_corte, peso, preco, cursor)
                 atualizar_estoque(id_corte, novo_peso, cursor)
                 connection.commit()
+
+def buscar_compras(data_inicio, data_fim):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
+        with closing(connection.cursor()) as cursor:
+       	    rows = connection.execute('''SELECT compra.id, data_entrada, nome_corte, compra.quantidade, preco_kg FROM compra 
+            INNER JOIN corte ON compra.corte_id = corte.id
+            WHERE data_entrada BETWEEN ? and date(?, '+1 day')
+            ORDER BY compra.data_entrada DESC;''', (data_inicio, data_fim)).fetchall()
+    return rows
 
 @app.route("/compras", methods=["GET", "POST"])
 def compras():
@@ -224,16 +244,20 @@ def atualizar_corte():
 
 @app.route("/relatorio_compras", methods=["GET", "POST"])
 def relatorio_compras():
+    if request.method == "POST":
+        compras = buscar_compras(request.form.get('data_inicio'), request.form.get('data_fim'));
+        return render_template("relatorio_compras.html", compras=compras)
+
     return render_template("relatorio_compras.html")
 
 
 @app.route("/relatorio_vendas", methods=["GET", "POST"])
 def relatorio_vendas():
+    if request.method == "POST":
+        vendas = buscar_vendas(request.form.get('data_inicio'), request.form.get('data_fim'));
+        return render_template("relatorio_vendas.html", vendas=vendas)
+
     return render_template("relatorio_vendas.html")
-
-
-
-
 
 
 @app.route("/relatorios", methods=["GET", "POST"])

@@ -185,6 +185,16 @@ def create_app(test_config=None):
     def relatorios():
         return render_template("relatorios.html")
 
+    @app.route("/relatorio_compras", methods=["GET", "POST"])
+    def relatorio_compras():
+        return render_template("relatorio_compras.html")
+
+
+    @app.route("/relatorio_vendas", methods=["GET", "POST"])
+    def relatorio_vendas():
+        return render_template("relatorio_vendas.html")
+
+
     db.init_app(app)
     return app
 
