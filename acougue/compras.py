@@ -1,3 +1,5 @@
+import ctypes
+
 from flask import Blueprint, redirect, render_template, request
 from acougue.db import get_db
 
@@ -16,6 +18,8 @@ def compras():
             novo_peso = corte['quantidade'] + float(peso)
             db_insere_compra(id_corte, peso, preco)
             db_atualizar_estoque(id_corte, novo_peso)
+        else:
+            ctypes.windll.user32.MessageBoxW(0, "Id de corte inexistente", "Erro", 0)
 
         return redirect("/compras")
     else:

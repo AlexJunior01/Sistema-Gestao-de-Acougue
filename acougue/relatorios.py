@@ -30,9 +30,9 @@ def db_buscar_compras(data_inicio, data_fim):
     connection = get_db()
     sql = '''SELECT compra.id, data_entrada, nome_corte, compra.quantidade, preco_kg FROM compra 
     INNER JOIN corte ON compra.corte_id = corte.id
-    WHERE data_entrada BETWEEN ? and date(?, '+1 day')
+    WHERE data_entrada BETWEEN ? and date(?, '+1 day') OR data_entrada BETWEEN ? and date(?, '+1 day')
     ORDER BY compra.data_entrada DESC;'''
-    rows = connection.execute(sql, (data_inicio, data_fim)).fetchall()
+    rows = connection.execute(sql, (data_inicio, data_fim, data_fim, data_inicio)).fetchall()
     return rows
 
 
@@ -40,8 +40,8 @@ def db_buscar_vendas(data_inicio, data_fim):
     connection = get_db()
     sql = '''SELECT venda.id, data_venda, nome_corte, venda.quantidade, valor_total FROM venda 
     INNER JOIN corte ON venda.corte_id = corte.id
-    WHERE data_venda BETWEEN ? and date(?, '+1 day')
+    WHERE data_venda BETWEEN ? and date(?, '+1 day') OR data_venda BETWEEN ? and date(?, '+1 day')
     ORDER BY venda.data_venda DESC;'''
 
-    rows = connection.execute(sql, (data_inicio, data_fim)).fetchall()
+    rows = connection.execute(sql, (data_inicio, data_fim, data_fim, data_inicio)).fetchall()
     return rows
