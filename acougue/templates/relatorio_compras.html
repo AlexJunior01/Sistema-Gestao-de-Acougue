@@ -6,25 +6,6 @@
 
 {% block content %}
     <div class="container">
-        <div class="row mb-5">
-            <form action="/vendas" method="post">
-                <div class="input-group mb-3">
-                    <input name="id_corte" type="text" class="form-control" placeholder="Id corte" value={{ id_corte }}>
-                    <input name="peso" type="text" class="form-control" placeholder="Peso" value={{ peso }} >
-                    <input name="valor_total" type="hidden" class="form-control" placeholder="Valor total" value={{ valor_total }} >
-                    
-                    <input name="valor_total_visivel" class="form-control" type="text" aria-label="Disabled input example" disabled readonly value="R$ {{ valor_total }} ">
-
-                    <button type="submit" formaction="/vendas" class="btn btn-primary btn-lg"> Confirmar </button>
-                </div>
-                <div role="main" class="col-md-2">
-                    <button type="submit" formaction="/calcular_venda" class="btn btn-secondary"> Calcular </button>
-                    <button type="submit" formaction="/limpar_venda" class="btn btn-secondary"> Limpar </button>
-                </div>
-            </form>
-            
-
-        </div>
         <div class="container">
             <div class="row mb-5">
                 <form action="/relatorios/compras" method="post">

@@ -280,7 +280,7 @@ def atualizar_corte():
 
 ################################################################ RELATORIOS ################################################################
 
-@app.route("/relatorio_compras", methods=["GET", "POST"])
+@app.route("/relatorios/compras", methods=["GET", "POST"])
 def relatorio_compras():
     if request.method == "POST":
         compras = buscar_compras(request.form.get('data_inicio'), request.form.get('data_fim'));
@@ -289,7 +289,7 @@ def relatorio_compras():
     return render_template("relatorio_compras.html")
 
 
-@app.route("/relatorio_vendas", methods=["GET", "POST"])
+@app.route("/relatorios/vendas", methods=["GET", "POST"])
 def relatorio_vendas():
     if request.method == "POST":
         vendas = buscar_vendas(request.form.get('data_inicio'), request.form.get('data_fim'));
