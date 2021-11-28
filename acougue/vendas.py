@@ -1,6 +1,5 @@
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request, flash
 from acougue.db import get_db
-import ctypes
 
 bp = Blueprint('vendas', __name__)
 
@@ -14,13 +13,13 @@ def vendas():
         corte = db_recuperar_corte_por_id(id_corte)
 
         if(float(peso) < 0):
-            ctypes.windll.user32.MessageBoxW(0, "Peso não pode ter valor negativo", "Erro", 0)
+            flash("Peso não pode ter valor negativo", "Erro")
         elif(corte):
             novo_peso = corte['quantidade'] - float(peso)
             db_insere_venda(id_corte, peso, valor_total)
             db_atualizar_estoque(id_corte, novo_peso)
         else:
-            ctypes.windll.user32.MessageBoxW(0, "Id de corte inexistente", "Erro", 0)
+            flash("Id de corte inexistente", "Erro")
 
         return redirect("/vendas")
     else:
