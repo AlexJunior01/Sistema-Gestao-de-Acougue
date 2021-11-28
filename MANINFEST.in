@@ -1,0 +1,4 @@
+include acougue/schema.sql
+graft acougue/static
+graft acougue/templates
+global-exclude *.pyc
