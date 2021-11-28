@@ -12,9 +12,9 @@ def vendas():
         valor_total = request.form.get('valor_total')
         corte = db_recuperar_corte_por_id(id_corte)
 
-        if(float(peso) < 0):
+        if float(peso) < 0:
             flash("Peso não pode ter valor negativo", "Erro")
-        elif(corte):
+        elif corte:
             novo_peso = corte['quantidade'] - float(peso)
             db_insere_venda(id_corte, peso, valor_total)
             db_atualizar_estoque(id_corte, novo_peso)
@@ -29,18 +29,20 @@ def vendas():
 
 @bp.route("/calcular_venda", methods=["GET", "POST"])
 def calcula_venda():
+    if request.method == "GET":
+        return redirect('/vendas')
+
     rows = db_recuperar_resumo_vendas()
 
     id_corte = request.form.get('id_corte')
     peso = request.form.get('peso')
     preco = db_recuperar_preco_do_corte(id_corte)
 
-    if (not preco):
+    if not preco:
         flash(f"Não foi possível calcular o preço, id {id_corte} não existe.")
         return redirect("/vendas")
     else:
         valor_total = float(preco[0]) * float(peso)
-
     return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
 
 
