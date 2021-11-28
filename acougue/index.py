@@ -2,6 +2,7 @@ import sqlite3
 from flask import Flask, render_template, request, redirect
 import os
 from contextlib import closing
+import ctypes  
 
 currentDirectory = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,20 +18,40 @@ def get_corte_id(id):
             result = cursor.execute("SELECT * FROM corte WHERE id = ?;", (id,)).fetchone()
     return result
 
+def verifica_existencia_corte(corte):
+    with closing(sqlite3.connect("acougue.db")) as connection:
+        connection.row_factory = sqlite3.Row
+        with closing(connection.cursor()) as cursor:
+            result = cursor.execute("SELECT nome_corte FROM corte;").fetchall()
+    for resultado in result:
+        if(resultado['nome_corte'].lower() == corte.lower()):
+            ctypes.windll.user32.MessageBoxW(0, "Corte já existente", "Erro", 0)
+            return True
+    return False
+
+
 
 def insert_corte(corte, preco):
-    with closing(sqlite3.connect("acougue.db")) as connection:
-        with closing(connection.cursor()) as cursor:
-            cursor.execute("INSERT INTO corte(nome_corte, preco, quantidade) VALUES(?, ?, 0)",
+    if (verifica_existencia_corte(corte)):
+        return redirect("/cortes")
+    else:
+        with closing(sqlite3.connect("acougue.db")) as connection:
+            with closing(connection.cursor()) as cursor:
+                cursor.execute("INSERT INTO corte(nome_corte, preco, quantidade) VALUES(?, ?, 0)",
                            (corte, preco))
-            connection.commit()
+                connection.commit()
 
 
 def deletar_corte_db(id_corte):
-    with closing(sqlite3.connect("acougue.db")) as connection:
-        with closing(connection.cursor()) as cursor:
-            cursor.execute("DELETE FROM corte WHERE id = ?;", (id_corte,))
-            connection.commit()
+    try:
+        result = get_corte_id(id)
+        with closing(sqlite3.connect("acougue.db")) as connection:
+            with closing(connection.cursor()) as cursor:
+                cursor.execute("DELETE FROM corte WHERE id = ?;", (id_corte,))
+                connection.commit()
+    except:
+        ctypes.windll.user32.MessageBoxW(0, "Não foi possível remover corte, Id corte inexistente", "Erro", 0)
+        return redirect("/cortes")
 
 
 def atualizar_estoque(id_corte, novo_peso, cursor):
@@ -59,10 +80,12 @@ def get_resumo_vendas():
     return rows
 
 
+
 def insere_venda(id_corte, peso, valor_total, cursor):
     sql = '''INSERT INTO venda(corte_id, quantidade, valor_total, data_venda) 
-            VALUES(?, ?, ?, datetime('now'));'''
+                VALUES(?, ?, ?, datetime('now'));'''
     cursor.execute(sql, (id_corte, peso, valor_total))
+    
 
 
 def nova_venda(id_corte, peso, valor_total):
@@ -82,8 +105,8 @@ def buscar_vendas(data_inicio, data_fim):
         with closing(connection.cursor()) as cursor:
        	    rows = connection.execute('''SELECT venda.id, data_venda, nome_corte, venda.quantidade, valor_total FROM venda 
             INNER JOIN corte ON venda.corte_id = corte.id
-            WHERE data_venda BETWEEN ? and date(?, '+1 day')
-            ORDER BY venda.data_venda DESC;''', (data_inicio, data_fim)).fetchall()
+            WHERE data_venda BETWEEN ? and date(?, '+1 day') OR data_venda BETWEEN ? and date(?, '+1 day')
+            ORDER BY venda.data_venda DESC;''', (data_inicio, data_fim, data_fim, data_inicio)).fetchall()
     return rows
 
 
@@ -106,9 +129,12 @@ def calcula_venda():
             id_corte = request.form.get('id_corte')
             peso = request.form.get('peso')
 
-            preco = cursor.execute("SELECT preco FROM corte WHERE id = ?;", (id_corte,)).fetchone()
-
-            valor_total = float(preco[0]) * float(peso)
+            try:
+                preco = cursor.execute("SELECT preco FROM corte WHERE id = ?;", (id_corte,)).fetchone()
+                valor_total = float(preco[0]) * float(peso)
+            except:
+                ctypes.windll.user32.MessageBoxW(0, "Id de corte inexistente", "Erro", 0)
+                return render_template("vendas.html", vendas=rows)
 
     return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
 
@@ -148,6 +174,8 @@ def nova_compra(id_corte, peso, preco):
                 insere_compra(id_corte, peso, preco, cursor)
                 atualizar_estoque(id_corte, novo_peso, cursor)
                 connection.commit()
+            else:
+                ctypes.windll.user32.MessageBoxW(0, "Id de corte inexistente", "Erro", 0)
 
 def buscar_compras(data_inicio, data_fim):
     with closing(sqlite3.connect("acougue.db")) as connection:
@@ -155,8 +183,8 @@ def buscar_compras(data_inicio, data_fim):
         with closing(connection.cursor()) as cursor:
        	    rows = connection.execute('''SELECT compra.id, data_entrada, nome_corte, compra.quantidade, preco_kg FROM compra 
             INNER JOIN corte ON compra.corte_id = corte.id
-            WHERE data_entrada BETWEEN ? and date(?, '+1 day')
-            ORDER BY compra.data_entrada DESC;''', (data_inicio, data_fim)).fetchall()
+            WHERE data_entrada BETWEEN ? and date(?, '+1 day') OR data_entrada BETWEEN ? and date(?, '+1 day')
+            ORDER BY compra.data_entrada DESC;''', (data_inicio, data_fim, data_fim, data_inicio)).fetchall()
     return rows
 
 @app.route("/compras", methods=["GET", "POST"])
@@ -228,11 +256,21 @@ def atualizar_corte():
         with closing(sqlite3.connect("acougue.db")) as connection:
             with closing(connection.cursor()) as cursor:
                 if corte:
-                    cursor.execute("UPDATE corte SET nome_corte = ? WHERE id = ?", (corte, id,))
+                    result = get_corte_id(id)
+                    if(result):
+                        cursor.execute("UPDATE corte SET nome_corte = ? WHERE id = ?", (corte, id,))
+                    else:
+                        ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, Id de corte inexistente", "Erro", 0)
                 if preco:
-                    cursor.execute("UPDATE corte SET preco = ? WHERE id = ?", (preco, id,))
+                    if (float(preco) > 0):
+                        cursor.execute("UPDATE corte SET preco = ? WHERE id = ?", (preco, id,))
+                    else:
+                        ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, preço deve ser maior do que zero", "Erro", 0)
                 if quantidade:
-                    cursor.execute("UPDATE corte SET quantidade = ? WHERE id = ?", (quantidade, id,))
+                    if (float(quantidade) > 0):
+                        cursor.execute("UPDATE corte SET quantidade = ? WHERE id = ?", (quantidade, id,))
+                    else:
+                        ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, quantidade deve ser maior do que zero", "Erro", 0)
                 connection.commit()
 
         return redirect("/cortes")
