@@ -1,6 +1,6 @@
 import ctypes
 
-from flask import Blueprint, redirect, render_template, request, flash
+from flask import Blueprint, redirect, render_template, request, flash, session
 from acougue.db import get_db
 
 bp = Blueprint('cortes', __name__, )
@@ -54,13 +54,16 @@ def db_inserir_corte(corte, preco):
                            (corte, preco))
         connection.commit()
 
+def apagar_popup():
+    session.pop('_flashes', None)
+
 
 def db_deletar_corte(id_corte):
     
     result = db_recuperar_corte_por_id(id_corte)
     
     if(not(result)):
-        ctypes.windll.user32.MessageBoxW(0, "Não foi possível remover corte, Id de corte inexistente", "Erro", 0)
+        flash(u'Não foi possível remover corte, Id corte inexistente!', 'error')
         return redirect("/cortes")
 
     connection = get_db()
@@ -78,10 +81,11 @@ def db_atualizar_corte(id, corte, preco, quantidade):
             connection.execute("UPDATE corte SET nome_corte = ? WHERE id = ?", (corte, id,))
         else:
             ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, Id de corte inexistente", "Erro", 0)
-    if (float(preco) > 0):
-        connection.execute("UPDATE corte SET preco = ? WHERE id = ?", (preco, id,))
-    else:
-        ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, preço deve ser maior do que zero",
+    if preco:
+        if (float(preco) > 0):
+            connection.execute("UPDATE corte SET preco = ? WHERE id = ?", (preco, id,))
+        else:
+            ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, preço deve ser maior do que zero",
                                          "Erro", 0)
     if quantidade:
         if (float(quantidade) > 0):
