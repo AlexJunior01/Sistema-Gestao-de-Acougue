@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block head %}
+{% endblock %}
+{% block title %}Relatorio Compras{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="container">
+            <div class="row mb-5">
+                <form action="/relatorios/compras" method="post">
+                    <div class="input-group mb-3">
+                        <input name="data_inicio" type="date" class="form-control" placeholder="Data início" value={{ data_inicio }}>
+                        <input name="data_fim" type="date" class="form-control" placeholder="Data fim" value={{ data_fim }} >
+
+                        <button type="submit" formaction="/relatorios/compras" class="btn btn-primary btn-lg"> Confirmar </button>
+                    </div>
+                </form>
+                
+
+            </div>
+            <div class="row">
+                <div role="main" class="col-md-12">
+                    <h2>Compras</h2>
+                     <table class="table table-striped table-responsive table-bordered">
+                        <thead class="thead-default">
+                            <tr>
+                                <th>Id</th>
+                                <th>Data da Compra</th>
+                                <th>Carne</th>
+                                <th>Quantidade</th>
+                                <th>Preço Kg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for compra in compras:%}
+                            <tr>
+                                <td>{{ compra['id'] }}</td>
+                                <td>{{ compra['data_entrada'] }}</td>
+                                <td>{{ compra['nome_corte'] }}</td>
+                                <td>{{ compra['quantidade'] }}</td>
+                                <td>{{ compra['preco_kg'] }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10"></div>
+            <div class="col-md-2">
+                <a class="btn btn-primary" href="/relatorios" role="button">Relatório</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -81,3 +81,9 @@ tbody tr:nth-of-type(odd) {
     background-color: rgb(179, 208, 255, 0.3)
 }
 
+.topleft {
+  position: absolute;
+  top: 40px;
+  left: 16px;
+  font-size: 18px;
+}

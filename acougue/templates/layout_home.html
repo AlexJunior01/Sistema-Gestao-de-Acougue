@@ -2,6 +2,7 @@
 
 <html lang="en">
     <head>
+        <title>{% block title %}{% endblock %}</title>
         <meta charset="utf-8">
         
 
@@ -11,14 +12,14 @@
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
           crossorigin="anonymous">
 
-        <title>Relatórios</title>
     </head>
     <body>
         <div class="jumbotron">
-            <h1>Relatórios</h1>
+            <h1>{{ self.title() }}</h1>
         </div>
-        <div class="container">
-            <h1>Pagina em construção</h1>
-        </div>
+
+        {% block content %}
+        {% endblock %}
+
     </body>
 </html>
