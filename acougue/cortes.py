@@ -1,6 +1,6 @@
 import ctypes
 
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request, flash
 from acougue.db import get_db
 
 bp = Blueprint('cortes', __name__, )
@@ -56,14 +56,18 @@ def db_inserir_corte(corte, preco):
 
 
 def db_deletar_corte(id_corte):
-    try:
-        result = db_recuperar_corte_por_id(id)
-        connection = get_db()
-        connection.execute("DELETE FROM corte WHERE id = ?;", (id_corte,))
-        connection.commit()
-    except:
-        ctypes.windll.user32.MessageBoxW(0, "Não foi possível remover corte, Id corte inexistente", "Erro", 0)
+    
+    result = db_recuperar_corte_por_id(id_corte)
+    
+    if(not(result)):
+        ctypes.windll.user32.MessageBoxW(0, "Não foi possível remover corte, Id de corte inexistente", "Erro", 0)
         return redirect("/cortes")
+
+    connection = get_db()
+    connection.execute("DELETE FROM corte WHERE id = ?;", (id_corte,))
+    connection.commit()
+    
+    return redirect("/cortes")
 
 
 def db_atualizar_corte(id, corte, preco, quantidade):

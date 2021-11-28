@@ -14,7 +14,11 @@ def compras():
         preco = request.form.get('preco')
         corte = db_recuperar_corte_por_id(id_corte)
 
-        if corte:
+        if(float(peso) < 0):
+            ctypes.windll.user32.MessageBoxW(0, "Peso não pode ter valor negativo", "Erro", 0)
+        elif(float(preco) < 0):
+            ctypes.windll.user32.MessageBoxW(0, "Preço não pode ter valor negativo", "Erro", 0)
+        elif corte:
             novo_peso = corte['quantidade'] + float(peso)
             db_insere_compra(id_corte, peso, preco)
             db_atualizar_estoque(id_corte, novo_peso)
