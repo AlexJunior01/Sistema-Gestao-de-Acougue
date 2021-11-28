@@ -53,9 +53,6 @@ def db_inserir_corte(corte, preco):
                            (corte, preco))
         connection.commit()
 
-def apagar_popup():
-    session.pop('_flashes', None)
-
 
 def db_deletar_corte(id_corte):
     
