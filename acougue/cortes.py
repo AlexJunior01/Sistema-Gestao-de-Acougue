@@ -1,6 +1,5 @@
-import ctypes
+from flask import Blueprint, redirect, render_template, request, flash
 
-from flask import Blueprint, redirect, render_template, request, flash, session
 from acougue.db import get_db
 
 bp = Blueprint('cortes', __name__, )
@@ -63,7 +62,7 @@ def db_deletar_corte(id_corte):
     result = db_recuperar_corte_por_id(id_corte)
     
     if(not(result)):
-        flash(u'Não foi possível remover corte, Id corte inexistente!', 'error')
+        flash(f'Impossível remover corte! ID {id_corte} não existe', 'error')
         return redirect("/cortes")
 
     connection = get_db()
@@ -80,20 +79,17 @@ def db_atualizar_corte(id, corte, preco, quantidade):
         if result:
             connection.execute("UPDATE corte SET nome_corte = ? WHERE id = ?", (corte, id,))
         else:
-            ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, Id de corte inexistente", "Erro", 0)
+            flash(f"Não foi possível atualizar corte, Id {id} não existe", "Erro")
     if preco:
         if (float(preco) > 0):
             connection.execute("UPDATE corte SET preco = ? WHERE id = ?", (preco, id,))
         else:
-            ctypes.windll.user32.MessageBoxW(0, "Não foi possível atualizar corte, preço deve ser maior do que zero",
-                                         "Erro", 0)
+            flash("Não foi possível atualizar corte, preço deve ser maior do que zero", "Erro")
     if quantidade:
         if (float(quantidade) > 0):
             connection.execute("UPDATE corte SET quantidade = ? WHERE id = ?", (quantidade, id,))
         else:
-            ctypes.windll.user32.MessageBoxW(0,
-                                             "Não foi possível atualizar corte, quantidade deve ser maior do que zero",
-                                             "Erro", 0)
+            flash("Não foi possível atualizar corte, quantidade deve ser maior do que zero", "Erro")
     connection.commit()
 
 
@@ -103,7 +99,7 @@ def db_verifica_existencia_corte(corte):
 
     for resultado in result:
         if(resultado['nome_corte'].lower() == corte.lower()):
-            ctypes.windll.user32.MessageBoxW(0, "Corte já existente", "Erro", 0)
+            flash("Corte já existe", "Erro")
             return True
     return False
 
