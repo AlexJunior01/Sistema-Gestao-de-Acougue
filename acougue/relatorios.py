@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request, flash
 from acougue.db import get_db
 
 bp = Blueprint('relatorios', __name__, url_prefix='/relatorios')
@@ -19,6 +19,21 @@ def relatorio_vendas():
         return render_template("relatorio_vendas.html", vendas=vendas)
 
     return render_template("relatorio_vendas.html")
+
+@bp.route("/estoque", methods=["GET", "POST"])
+def relatorio_estoque():
+    if request.method == "POST":
+        peso = request.form.get('peso')
+        
+        if not peso:
+            flash("Peso não informado")
+        elif (float(peso) < 0):
+            flash("Peso não pode ser negativo")
+        else:
+            cortes = db_buscar_estoque(peso);
+            return render_template("relatorio_estoque.html", cortes=cortes)
+
+    return render_template("relatorio_estoque.html")
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -44,4 +59,13 @@ def db_buscar_vendas(data_inicio, data_fim):
     ORDER BY venda.data_venda DESC;'''
 
     rows = connection.execute(sql, (data_inicio, data_fim, data_fim, data_inicio)).fetchall()
+    return rows
+
+def db_buscar_estoque(peso):
+    connection = get_db()
+    sql = '''SELECT nome_corte, quantidade FROM corte 
+    WHERE quantidade <= ?
+    ORDER BY quantidade;'''
+
+    rows = connection.execute(sql, (peso, )).fetchall()
     return rows

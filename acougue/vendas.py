@@ -34,7 +34,12 @@ def calcula_venda():
     id_corte = request.form.get('id_corte')
     peso = request.form.get('peso')
     preco = db_recuperar_preco_do_corte(id_corte)
-    valor_total = float(preco[0]) * float(peso)
+
+    if (not preco):
+        flash(f"Não foi possível calcular o preço, id {id_corte} não existe.")
+        return redirect("/vendas")
+    else:
+        valor_total = float(preco[0]) * float(peso)
 
     return render_template("vendas.html", vendas=rows, valor_total=valor_total, id_corte=id_corte, peso=peso)
 
