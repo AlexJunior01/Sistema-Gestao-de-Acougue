@@ -22,7 +22,7 @@ pip install -e .
 flask init-db
 ```
 
-7- Entre novamente no ambiente virtual e execute o arquivo "__init__.py" para executar o Flask.
+7- Entre novamente no ambiente virtual e execute o arquivo "\_\_init\_\_.py" para executar o Flask.
 
 ```bash
 flask run
