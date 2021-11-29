@@ -11,21 +11,21 @@ https://phoenixnap.com/kb/install-flask .
 4- Ative o ambiente virtual e faça a instalação dos requisitos utilizando nosso arquivo requirements.txt com o comando
 
 ```bash
-pip install --upgrade -r requirements.txt
+pip install -e .
 ```
 
 5- Faça a instalação do SQLITE3 em seu computador seguindo o tutorial do link a seguir: https://www.tutorialspoint.com/sqlite/sqlite_installation.htm .
 
-6- Execute o arquivo setup_db.py para fazer a criação das tabelas.
+6- Execute o seguinte script para fazer a criação das tabelas.
 
 ```bash
-python setup_db.py
+flask init-db
 ```
 
-7- Entre novamente no ambiente virtual e execute o arquivo "index.py" para executar o Flask.
+7- Entre novamente no ambiente virtual e execute o arquivo "__init__.py" para executar o Flask.
 
 ```bash
-python index.py
+flask run
 ```
 
 8- Acesse a pagina principal do projeto a partir de: http://localhost:5000/ 
